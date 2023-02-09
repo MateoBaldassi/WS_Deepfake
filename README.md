@@ -13,11 +13,15 @@ Ce WS qui se présente sous forme de "tuto" est créé spécifiquement pour fair
 ## Requirement
 Numpy, pip, python et DirectX12
 
-DirectX12 (Carte graphique compatible).
-(Recommandé RTX 2070+ / Radeon RX 5700 XT+).
-CPU Moderne (Ryzen 7 5k+/intel I7 9k+).
-4GB RAM, 32GB+ place.
-Windows 10.
+DirectX12 (Carte graphique compatible)
+
+(Recommandé RTX 2070+ / Radeon RX 5700 XT+)
+
+CPU Moderne (Ryzen 7 5k+/intel I7 9k+)
+
+4GB RAM, 32GB+ place
+
+Windows 10
 (Si vous êtes sur linux et que vous n'avez pas Windows installez une VM ou débrouillez vous.)
 
 ## Installation
