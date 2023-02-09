@@ -11,6 +11,7 @@ Ce WS qui se présente sous forme de "tuto" est créé spécifiquement pour fair
 - Utiliser un modèle (sur Teams/Discord/Twitch)
 
 ## Requirement
+Numpy, pip, python et DirectX12
 
 DirectX12 (Carte graphique compatible)
 (Recommandé RTX 2070+ / Radeon RX 5700 XT+ )
@@ -22,6 +23,7 @@ Windows 10
 ## Installation
 
 Téléchargez deepfacelive et DeepFaceLab AVEC EN FONCTION DE VOTRE MATERIEL !!!
+https://drive.google.com/drive/folders/1sqmYvEE7o6Hhci7qxUSSJpmJwh7S99A0?usp=sharing
 (Exemple : Si vous avez une RTX 2070 vous prenez 'DeepFaceLab_NVIDIA_up_to_RTX2080Ti...')
 
 Lancez les 2 .exe pour extraire les fichiers dans votre dossier :
@@ -31,6 +33,8 @@ Vous devriez avoir un truc qui ressemble à ça :
 ![](Directory.png)
 
 ## 1. Le Data Set  
+
+### 1.1 Trouver la vidéo et extraire les gens
 
 Tout d'abord allez dans le dossier DeepFaceLab_XXXXXXXX\workspace et supprimez les fichier vidéo data_src et data_dst.
 
@@ -44,6 +48,8 @@ On vous demande le nombre de FPS pressez "Entrée" si vous avez de la place sur 
 Ensuite même principe, pour une meilleure qualité choisissez "png" mais si vous n'avez pas de place jpg.
 En fonction de la taille de votre vidéo cela va prendre plus ou moins de temps.
 
+### 1.2 Extraire uniquement les têtes
+
 Quand le programme à fini de découper toute les frames vous devez maintenant extraire uniquement les têtes, pour cela executez le "4) data_src faceset extract".
 Une série d'option vont apparaître :
 - GPU/CPU :  Si vous voulez allez plus vite prenez le GPU (ceux sans carte graphique beh CPU).
@@ -53,116 +59,85 @@ Une série d'option vont apparaître :
 - Jpeg quality : Mettez 100 ça ne change pas grand choses de mettre plus bas
 - Write debug images to aligned_debug : Laissez "n" c'est pas utile pour notre application
 
+### 1.3 Enlever les anomalies
 
-| Plugin | README |
-| ------ | ------ |
-| Dropbox | [plugins/dropbox/README.md][PlDb] |
-| GitHub | [plugins/github/README.md][PlGh] |
-| Google Drive | [plugins/googledrive/README.md][PlGd] |
-| OneDrive | [plugins/onedrive/README.md][PlOd] |
-| Medium | [plugins/medium/README.md][PlMe] |
-| Google Analytics | [plugins/googleanalytics/README.md][PlGa] |
+Après avoir récupéré des milliers de têtes vous allez devoir enlever toute les images qui vont polluer votre faceset.
+Pour cela vous pouvez executer le bat "4.2 data_src sort" puis choisir l'option "5 histogram similarity" pour trier par tête et ne garder que la personne que vous voulez si vous avez une vidéo avec plusieurs personnes.
+Vous pouvez ensuite retrier en utilisant les options : 
+- "7 brightness" pour les image trop ou pas assez lumineuses
+- "1 motion blur" pour les flous de mouvement
+- "2 face yaw direction" pour les image ou la tête est tourné sur un coté (gauche/droite) mais on ne vois vraiment pas sa tête.
 
-## Development
+### 1.4 Appliquer le masque Xseg
 
-Want to contribute? Great!
+Pour pouvoir commencer à entrainer votre faceset vous devez appliquer un masque générique en executant le bat :
+"5.XSeg Generic) data_src whole_face mask" ou le faire vous même en option (voir 1.4bis)
 
-Dillinger uses Gulp + Webpack for fast developing.
-Make a change in your file and instantaneously see your updates!
+### 1.4Bis Créer votre Xseg mask
 
-Open your favorite Terminal and run these commands.
+Venez me voir si vous voulez vraiment savoir comment faire.
 
-First Tab:
+## 2 On train le modèle:
 
-```sh
-node app
-```
+### 2.1 Récupérer le faceset _dst et compresser le _src
 
-Second Tab:
+Sur cette partie la on va un peu tricher et se faciliter la vie en prenant un faceset énorme pour entrainer le notre sur lui. 
+Vous pouvez télécharger le faceset ici :
+https://drive.google.com/drive/folders/14NufKaE6VWlnq4NiBv_SsiQ-pwgnJ5SF
+Et le placer ensuite dans : "\workspace\data_dst\aligned"
 
-```sh
-gulp watch
-```
+Ensuite revenez à aux .bat et executez : "4.2) data_src util faceset pack" et tapez y pour supprimez vos images sources si vous ne comptez pas revenir dessus et c'est bon l'entrainement peut commencer !
 
-(optional) Third:
+## 2.2 L'entrainement
 
-```sh
-karma test
-```
+Pour commencer l'entrainement executez le bat "6) train SAEHD" et choisissez les options suivantes :
+- Autobackup every N hour : Choisir si vous voulez faire une save toute les N heures
+- Write preview history : Vous permet de choisir si vous voulez choisir quel tete vous allez entrainer manuellement (je déconseille) :
+- Target iteration : Arrête l'entrainement à une itération donnée (100k moyen, 500k, bon 1M excellent)
+- Flip SRC faces randomly : Va aléatoirement retourner les têtes horizontalement pour couvrir des angles dans le faceset_dst mais si vous avez un bon faceset ce n'est pas necessaire
+- Flip DST faces randomly : le DST fait 9GB.
+- Batch_size : C'est combien de tête seront comparée à chaque itération donc en fonction de ce que vous mettrez plus tard et de votre carte graphique vous pourrez mettre plus 10 ou 12 ou au contraire 6-4
+- Resolution : La résolution de votre modèle entre 64 et 640, plus elle est haute plus c'est long. ATTENTION ! Augmenter en base de 16 (64, 128, 256, etc...)
+- Face type ( h/mf/f/wf/head ?:help ) : h = bouche et sourcils, mf = h + 30% plus grand (~les joues), f = toute la face, wf = f plus les cotés (oreilles par exemple) et h = Head.
+- Architecture : J'ai pas assez approfondi laissez de base (c'est nouveau)
+- Encoder/Decoder 256, 64, 64, 32 avec RTX 2070
+- Masked training : Priorise l'entrainement avec le masque XSeg. (Laissez Y)
+- Eyes and mouth priority : Priorise l'entrainement de la bouche et des yeux. (Mettez Y)
+- Uniform_yaw : Aide a entrainer tout les cotés de la tête possible. Ce qui entraine le devant plus lentement mais mieux pour notre cas si on veux un bon suivis quand on tourne la tête.
+- Blur our mask : Laissez comme c'est.
+- Place models and optimizer on GPU : Mettre toute les ressources sur votre GPU. Si vous n'avez pas de bonne carte graphique (voir pas du tout) tapez "n"
+- Use AdaBelief optimizer? : Un modèle d'optimisation qui prend plus de VRAM. Même condition que l'option d'avant
+- Use learning rate dropout : Accélère l'entrainement des têtes mais bouffe plus de VRAM et pas forcément utile si on veut de la qualité 
+- Enable random warp of samples : Laisser "y"
+- Enable HSV power : Change la colorimétrie aléatoirement du faceset pour améliorer la stabilité au niveau des couleurs du modèle entrainé
+- GAN power : Expérimental pour le WS laissez 0.0
+- Face style power : Laissez 0.0
+- Color transfer for src faceset : Pour faire du matching de couleur lors de l'entrainement entre le faceset_src et _dst (on fait du deepfake en live) mettez none
+- Enable gradient clipping : Fait une save en cas de crash ça affecte les perf mais osef
+- Enable pretraining mode : Modèles préentrainé (On en utilise pas c'est ciao), mettez "n"
 
-#### Building for source
+C'est bon vous pouvez lancer et attendre indéfiniment que votre modèle s'entraine (c'est plusieurs dixaines d'heures) donc quand vous aurez dépassé la barre des 100k ou 500k ou alors tout simplement marre d'attendre vous appuyerez sur "Entrée" pour save et finir l'entrainement.
 
-For production release:
+Vous pouvez maintenant lancer le dernier .bat "6) export SAEHD as dfm" choisir votre modèle entrainé et taper "n" et voila vous allez avoir un .dfm dans "workspace\model"
 
-```sh
-gulp build --prod
-```
+## 3 Le deepfake en live :
 
-Generating pre-built zip archives for distribution:
+Téléchargez DeepFaceLive toujours sur le google drive : 
+https://drive.google.com/drive/folders/1sqmYvEE7o6Hhci7qxUSSJpmJwh7S99A0?usp=sharing
 
-```sh
-gulp build dist --prod
-```
+Démo pendant le WS
 
-## Docker
 
-Dillinger is very easy to install and deploy in a Docker container.
 
-By default, the Docker will expose port 8080, so change this within the
-Dockerfile if necessary. When ready, simply use the Dockerfile to
-build the image.
 
-```sh
-cd dillinger
-docker build -t <youruser>/dillinger:${package.json.version} .
-```
 
-This will create the dillinger image and pull in the necessary dependencies.
-Be sure to swap out `${package.json.version}` with the actual
-version of Dillinger.
 
-Once done, run the Docker image and map the port to whatever you wish on
-your host. In this example, we simply map port 8000 of the host to
-port 8080 of the Docker (or whatever port was exposed in the Dockerfile):
 
-```sh
-docker run -d -p 8000:8080 --restart=always --cap-add=SYS_ADMIN --name=dillinger <youruser>/dillinger:${package.json.version}
-```
 
-> Note: `--capt-add=SYS-ADMIN` is required for PDF rendering.
 
-Verify the deployment by navigating to your server address in
-your preferred browser.
 
-```sh
-127.0.0.1:8000
-```
 
-## License
 
-MIT
 
-**Free Software, Hell Yeah!**
 
-[//]: # (These are reference links used in the body of this note and get stripped out when the markdown processor does its job. There is no need to format nicely because it shouldn't be seen. Thanks SO - http://stackoverflow.com/questions/4823468/store-comments-in-markdown-syntax)
 
-   [dill]: <https://github.com/joemccann/dillinger>
-   [git-repo-url]: <https://github.com/joemccann/dillinger.git>
-   [john gruber]: <http://daringfireball.net>
-   [df1]: <http://daringfireball.net/projects/markdown/>
-   [markdown-it]: <https://github.com/markdown-it/markdown-it>
-   [Ace Editor]: <http://ace.ajax.org>
-   [node.js]: <http://nodejs.org>
-   [Twitter Bootstrap]: <http://twitter.github.com/bootstrap/>
-   [jQuery]: <http://jquery.com>
-   [@tjholowaychuk]: <http://twitter.com/tjholowaychuk>
-   [express]: <http://expressjs.com>
-   [AngularJS]: <http://angularjs.org>
-   [Gulp]: <http://gulpjs.com>
-
-   [PlDb]: <https://github.com/joemccann/dillinger/tree/master/plugins/dropbox/README.md>
-   [PlGh]: <https://github.com/joemccann/dillinger/tree/master/plugins/github/README.md>
-   [PlGd]: <https://github.com/joemccann/dillinger/tree/master/plugins/googledrive/README.md>
-   [PlOd]: <https://github.com/joemccann/dillinger/tree/master/plugins/onedrive/README.md>
-   [PlMe]: <https://github.com/joemccann/dillinger/tree/master/plugins/medium/README.md>
-   [PlGa]: <https://github.com/RahulHP/dillinger/blob/master/plugins/googleanalytics/README.md>
