@@ -23,7 +23,9 @@ Windows 10.
 ## Installation
 
 Téléchargez deepfacelive et DeepFaceLab AVEC EN FONCTION DE VOTRE MATERIEL !!!
-https://drive.google.com/drive/folders/1sqmYvEE7o6Hhci7qxUSSJpmJwh7S99A0?usp=sharing
+
+https://drive.google.com/drive/folders/1sqmYvEE7o6Hhci7qxUSSJpmJwh7S99A0?usp=sharing .
+
 (Exemple : Si vous avez une RTX 2070 vous prenez 'DeepFaceLab_NVIDIA_up_to_RTX2080Ti...')
 
 Lancez les 2 .exe pour extraire les fichiers dans votre dossier :
