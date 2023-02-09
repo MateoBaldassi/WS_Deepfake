@@ -18,7 +18,7 @@ DirectX12 (Carte graphique compatible).
 CPU Moderne (Ryzen 7 5k+/intel I7 9k+).
 4GB RAM, 32GB+ place.
 Windows 10.
-(Si vous êtes sur linux et que vous n'avez pas Windows installez un VM ou débrouillez vous.)
+(Si vous êtes sur linux et que vous n'avez pas Windows installez une VM ou débrouillez vous.)
 
 ## Installation
 
