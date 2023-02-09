@@ -13,11 +13,11 @@ Ce WS qui se présente sous forme de "tuto" est créé spécifiquement pour fair
 ## Requirement
 Numpy, pip, python et DirectX12
 
-DirectX12 (Carte graphique compatible)
-(Recommandé RTX 2070+ / Radeon RX 5700 XT+ )
-CPU Moderne (Ryzen 7 5k+/intel I7 9k+)
-4GB RAM, 32GB+ place
-Windows 10
+DirectX12 (Carte graphique compatible).
+(Recommandé RTX 2070+ / Radeon RX 5700 XT+).
+CPU Moderne (Ryzen 7 5k+/intel I7 9k+).
+4GB RAM, 32GB+ place.
+Windows 10.
 (Si vous êtes sur linux et que vous n'avez pas Windows installez un VM ou débrouillez vous.)
 
 ## Installation
@@ -27,10 +27,10 @@ https://drive.google.com/drive/folders/1sqmYvEE7o6Hhci7qxUSSJpmJwh7S99A0?usp=sha
 (Exemple : Si vous avez une RTX 2070 vous prenez 'DeepFaceLab_NVIDIA_up_to_RTX2080Ti...')
 
 Lancez les 2 .exe pour extraire les fichiers dans votre dossier :
-![](Install.png)
+![](md_assets/Install.png)
 
 Vous devriez avoir un truc qui ressemble à ça :
-![](Directory.png)
+![](md_assets/Directory.png)
 
 ## 1. Le Data Set  
 
